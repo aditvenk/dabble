@@ -1,0 +1,10 @@
+{
+    "editor.formatOnSave": true,
+    "editor.wordWrap": "on",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+    }
+}
