@@ -182,3 +182,26 @@ def build_transformer_classifier(
         use_checkpoint=use_checkpoint,
     )
     return TransformerClassifier(cfg)
+
+
+def estimate_transformer_flops(
+    batch_size: int,
+    seq_len: int,
+    d_model: int,
+    num_layers: int,
+    num_heads: int,
+    dim_feedforward: int,
+    num_classes: int,
+) -> float:
+    """Rough (forward+backward) FLOP count for the transformer block."""
+    head_dim = d_model // num_heads
+    qkv = 3 * batch_size * seq_len * d_model * d_model
+    attn_scores = 2 * batch_size * num_heads * seq_len * seq_len * head_dim
+    attn_values = 2 * batch_size * num_heads * seq_len * seq_len * head_dim
+    proj_out = batch_size * seq_len * d_model * d_model
+    ffn_in = 2 * batch_size * seq_len * d_model * dim_feedforward
+    ffn_out = 2 * batch_size * seq_len * dim_feedforward * d_model
+    layer_flops = qkv + attn_scores + attn_values + proj_out + ffn_in + ffn_out
+    head_embed = 2 * batch_size * seq_len * d_model
+    classifier = 2 * batch_size * d_model * num_classes
+    return float(num_layers * layer_flops + head_embed + classifier)
